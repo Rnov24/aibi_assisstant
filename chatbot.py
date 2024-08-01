@@ -17,23 +17,15 @@ if "messages" not in st.session_state:
 
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
-
-if prompt := st.chat_input():
-    if not gemini_api_key:
-        st.info("Please add your Gemini API key to continue.")
-        st.stop()
-
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    st.chat_message("user").write(prompt)
-
-    genai.configure(api_key=gemini_api_key)
-    generation_config = {
+    
+genai.configure(api_key=gemini_api_key)
+generation_config = {
                         "temperature": 1,
                         "top_p": 0.95,
                         "top_k": 64,
                         "max_output_tokens": 8192,
                         "response_mime_type": "text/plain", }
-    model = genai.GenerativeModel(
+model = genai.GenerativeModel(
                                     model_name="gemini-1.5-flash",
                                     generation_config=generation_config,
                                     safety_settings={
@@ -79,12 +71,21 @@ if prompt := st.chat_input():
                                     Remember to always prioritize the learning experience and maintain a safe, respectful environment for all users.
                                     """
     )
-    chat_session = model.start_chat(history=[
+chat_session = model.start_chat(history=[
         {
             'role' : 'model',
             'parts' : 'Hallo namaku AIBI, barangkali ada yang bisa dibantu jangan sungkan sungkan yaa😊'
         }
     ])
+
+if prompt := st.chat_input():
+    if not gemini_api_key:
+        st.info("Please add your Gemini API key to continue.")
+        st.stop()
+
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    st.chat_message("user").write(prompt)
+
     
     response = chat_session.send_message(prompt)
     msg = response.text
